@@ -23,7 +23,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         result[jobIndex] = jobResult;
         if (jobs.length == ++finished)
             resolve(result);
-        else
+        else if (timedJobs.length)
             processJob(resolve, ...timedJobs.shift());
     }
 
