@@ -17,10 +17,11 @@ function timed(timeout) {
 function runParallel(jobs, parallelNum, timeout = 1000) {
     let timedJobs = jobs.map(timed(timeout)).map((x, i) => [x, i]);
     let result = [];
+    let finished = 0;
 
     function onAnyResult(resolve, jobResult, jobIndex) {
         result[jobIndex] = jobResult;
-        if (!timedJobs.length)
+        if (jobs.length == ++finished)
             resolve(result);
         else
             processJob(resolve, ...timedJobs.shift());
