@@ -1,7 +1,13 @@
+/* eslint-disable */
 'use strict';
 
-exports.isStar = true;
+exports.isStar = false;
 exports.runParallel = runParallel;
+
+function timed(timeout) {
+    return job => job;
+}
+
 
 /** Функция паралелльно запускает указанное число промисов
  * @param {Array} jobs – функции, которые возвращают промисы
@@ -9,5 +15,28 @@ exports.runParallel = runParallel;
  * @param {Number} timeout - таймаут работы промиса
  */
 function runParallel(jobs, parallelNum, timeout = 1000) {
-    // асинхронная магия
+    let timedJobs = jobs.map(timed(timeout)).map((x, i) => [x, i]);
+    let result = [];
+
+    function onAnyResult(resolve, jobResult, jobIndex) {
+        result[jobIndex] = jobResult;
+        if (!timedJobs.length)
+            resolve(result);
+        else
+            processJob(resolve, ...timedJobs.shift());
+    }
+
+    function processJob(resolve, job, jobIndex) {
+        let handler = jobResult => onAnyResult(resolve, jobResult, jobIndex);
+        job().then(handler).catch(handler);
+    }
+
+    return new Promise(resolve => {
+        if (parallelNum > 0) {
+            let queue = timedJobs.slice(0, parallelNum);
+            timedJobs = timedJobs.slice(parallelNum);
+            queue.forEach(([x, i]) => processJob(resolve, x, i));
+        }
+        else resolve(result);
+    });
 }
