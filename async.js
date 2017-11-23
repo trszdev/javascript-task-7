@@ -1,13 +1,14 @@
 /* eslint-disable */
 'use strict';
 
-exports.isStar = false;
-exports.runParallel = runParallel;
+module.exports = { isStar: true, runParallel };
 
 function timed(timeout) {
-    return job => job;
+    return job => () => new Promise((resolve, reject) => {
+        job().then(resolve).catch(reject);
+        setTimeout(() => reject(new Error(`Promise timeout`)), timeout);
+    });
 }
-
 
 /** Функция паралелльно запускает указанное число промисов
  * @param {Array} jobs – функции, которые возвращают промисы
