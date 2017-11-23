@@ -33,7 +33,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
     }
 
     return new Promise(resolve => {
-        if (parallelNum > 0) {
+        if (parallelNum > 0 && jobs.length) {
             let queue = timedJobs.slice(0, parallelNum);
             timedJobs = timedJobs.slice(parallelNum);
             queue.forEach(([x, i]) => processJob(resolve, x, i));
